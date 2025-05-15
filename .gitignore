@@ -1,0 +1,7 @@
+node_modules
+package-lock.json
+omr_template.pdf
+filled_output.pdf
+coordinates.json
+dist
+.env
