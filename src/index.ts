@@ -41,7 +41,7 @@ export async function fillOMRSingle(
                     drawBubble(x, y, field.radius ?? 5);
 
                     if (field.text) {
-                        drawText(
+                        drawText( 
                             value[i],
                             x + (field.text.xOffset ?? 0),
                             field.text.y,
@@ -67,7 +67,7 @@ export async function generateOMR(
     const mergedPdf = await PDFDocument.create();
     const font = await mergedPdf.embedFont(StandardFonts.Courier);
 
-    const configErrors = validateConfig(config);
+    const configErrors = validateConfig(config); 
     // TODO: Better and prettier error handling
     if (configErrors.length) throw new Error(configErrors.join('\n'));
 
@@ -81,11 +81,35 @@ export async function generateOMR(
     return await mergedPdf.save();
 }
 
-function validateConfig(_config: Config): string[] {
+function validateConfig(config: Config): string[] {
     // TODO:
     // Implement checks in the config to ensure certain fields like `x` and `y` are always present
     // and check the lengths of all fields to ensure that out of bounds indices are never an issue.
-    return []
+    const errors: string[] = [];
+
+    for (const [fieldName, field] of Object.entries(config)) {
+        if (field.type === 'bubble-grid') {
+            const xLen = Object.keys(field.x ?? {}).length;
+            if(xLen == 0) errors.push(`Field ${fieldName} has no x coordinates specified`);
+            if (xLen !== field.length + 1) {
+                errors.push(`Field ${fieldName} has mismatched x length (${xLen} ≠ ${field.length})`);
+            }
+            for (const digit of '0123456789') {
+                if (!(digit in field.y)) {
+                    errors.push(`Field ${fieldName} missing y for digit ${digit}`);
+                }
+            }
+            if(!field.text?.y) errors.push(`Field ${fieldName} text has no y coordinate`);
+        }
+
+        if (field.type === 'text') {
+            if (!field.x || !field.y || typeof field.x !== 'number' || typeof field.y !== 'number') {
+                errors.push(`Field ${fieldName} has invalid position`);
+            }
+        }
+    }
+
+    return errors;
 }
 
 async function main() {
