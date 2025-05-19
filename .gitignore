@@ -3,5 +3,6 @@ package-lock.json
 omr_template.pdf
 filled_output.pdf
 config.json
+.DS_Store
 dist
 .env
