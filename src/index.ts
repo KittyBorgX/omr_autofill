@@ -1,7 +1,12 @@
 import * as fs from 'fs';
 import { PDFDocument, PDFFont, PDFPage, rgb, StandardFonts } from 'pdf-lib';
-import { Config, StudentData } from './types';
+import { Config } from './types';
 
+// Keys of the type must match the top level fields specified in `Config`. 
+type StudentData = {
+    uid: string;
+    name: string;
+};
 
 export async function fillOMRSingle(
     page: PDFPage,
@@ -41,7 +46,7 @@ export async function fillOMRSingle(
                     drawBubble(x, y, field.radius ?? 5);
 
                     if (field.text) {
-                        drawText( 
+                        drawText(
                             value[i],
                             x + (field.text.xOffset ?? 0),
                             field.text.y,
@@ -67,7 +72,7 @@ export async function generateOMR(
     const mergedPdf = await PDFDocument.create();
     const font = await mergedPdf.embedFont(StandardFonts.Courier);
 
-    const configErrors = validateConfig(config); 
+    const configErrors = validateConfig(config);
     // TODO: Better and prettier error handling
     if (configErrors.length) throw new Error(configErrors.join('\n'));
 
@@ -90,7 +95,7 @@ function validateConfig(config: Config): string[] {
     for (const [fieldName, field] of Object.entries(config)) {
         if (field.type === 'bubble-grid') {
             const xLen = Object.keys(field.x ?? {}).length;
-            if(xLen == 0) errors.push(`Field ${fieldName} has no x coordinates specified`);
+            if (xLen == 0) errors.push(`Field ${fieldName} has no x coordinates specified`);
             if (xLen !== field.length + 1) {
                 errors.push(`Field ${fieldName} has mismatched x length (${xLen} ≠ ${field.length})`);
             }
@@ -99,7 +104,7 @@ function validateConfig(config: Config): string[] {
                     errors.push(`Field ${fieldName} missing y for digit ${digit}`);
                 }
             }
-            if(!field.text?.y) errors.push(`Field ${fieldName} text has no y coordinate`);
+            if (!field.text?.y) errors.push(`Field ${fieldName} text has no y coordinate`);
         }
 
         if (field.type === 'text') {
@@ -108,7 +113,6 @@ function validateConfig(config: Config): string[] {
             }
         }
     }
-
     return errors;
 }
 

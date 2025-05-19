@@ -24,7 +24,4 @@ export type Config = {
   [fieldName: string]: FieldConfig;
 };
 
-export type StudentData = {
-    uid: string;
-    name: string;
-};
+
